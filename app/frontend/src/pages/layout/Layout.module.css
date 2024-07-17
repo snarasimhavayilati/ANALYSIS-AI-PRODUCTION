@@ -5,8 +5,8 @@
 }
 
 .header {
-    background-color: #222222;
-    color: #f2f2f2;
+    background-color: #f2f2f2;
+    color:#222222;
 }
 
 .headerContainer {
@@ -21,7 +21,7 @@
     display: flex;
     align-items: center;
     margin-right: 40px;
-    color: #f2f2f2;
+    color:#222222;
     text-decoration: none;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .headerNavPageLink {
-    color: #f2f2f2;
+    color: #222222;
     text-decoration: none;
     opacity: 0.75;
 
@@ -55,7 +55,7 @@
 }
 
 .headerNavPageLinkActive {
-    color: #f2f2f2;
+    color: #222222;
     text-decoration: none;
 }
 
@@ -71,8 +71,58 @@
 .microsoftLogo {
     height: 23px;
     font-weight: 600;
+
 }
 
 .githubLogo {
     height: 20px;
+    fill:#222222;
+}
+
+.navButton {
+  background-color: rgba(36,189,177,255); 
+  color: black; 
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.navButton:hover {
+  background-color: darkslategray; 
+}
+
+.footer {
+    position: relative;
+    text-align: right;
+    padding: 10px;
+}
+
+.footerButton {
+    background-color: rgba(36,189,177,255);
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    bottom: 45px;
+    right: 20px;
+}
+
+.footerButton:hover {
+    background-color: darkslategray;
+}
+
+
+@media (max-width: 1240px) {
+    .footerButton {
+        position: relative;
+        bottom: 10px;
+        margin-top: 10px;
+        right: 15px;
+    }
 }
