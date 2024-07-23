@@ -1,0 +1,2 @@
+This is Email Subject: {{$input}} .
+Act as a complience officer and Draft a polite tone mail.

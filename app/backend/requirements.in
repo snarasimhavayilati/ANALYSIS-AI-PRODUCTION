@@ -27,6 +27,7 @@ types-Pillow
 pypdf
 PyMuPDF
 beautifulsoup4
+semantic_kernel
 types-beautifulsoup4
 msgraph-sdk==1.1.0
 openai-messages-token-helper

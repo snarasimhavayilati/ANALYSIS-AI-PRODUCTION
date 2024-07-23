@@ -1,0 +1,5 @@
+This is JSON Data: {{$input}} .
+Act as a compliance officer checking Know Your Business (KYB). 
+List any issues you see in the following categories: 'addresses', 'watchlist', 'bankruptcies', 'certifications', 'documents', 'liens', 'names', 'litigations', 'actions', 'policy_results' 
+If any category contains null, none, or an empty array, it indicates no problem. 
+However, if there are any values in these categories, find the issues as you would when checking KYB and present them in paragraph or line format, not in JSON.

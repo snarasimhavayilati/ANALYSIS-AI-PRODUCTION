@@ -1,5 +1,7 @@
 from typing import Any, Awaitable, Callable, Coroutine, Optional, Union
-
+import os
+import logging
+import asyncio
 from azure.search.documents.aio import SearchClient
 from azure.storage.blob.aio import ContainerClient
 from openai import AsyncOpenAI, AsyncStream
@@ -16,6 +18,22 @@ from approaches.approach import ThoughtStep
 from approaches.chatapproach import ChatApproach
 from core.authentication import AuthenticationHelper
 from core.imageshelper import fetch_image
+from semantic_kernel import Kernel
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
+from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
+from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
+from semantic_kernel.contents.chat_history import ChatHistory
+from semantic_kernel.functions.kernel_arguments import KernelArguments
+from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import (
+    AzureChatPromptExecutionSettings, OpenAIChatPromptExecutionSettings
+)
+#from services import Service
+#from samples.service_settings import ServiceSettings
+from semantic_kernel.planners.function_calling_stepwise_planner import (
+    FunctionCallingStepwisePlanner,
+    FunctionCallingStepwisePlannerOptions,
+)
+from plugins.api_plugin import ApiPlugin
 
 
 class ChatReadRetrieveReadVisionApproach(ChatApproach):
@@ -67,20 +85,33 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """
-        You are an intelligent assistant helping analyze the Annual Financial Report of Contoso Ltd., The documents contain text, graphs, tables and images.
-        Each image source has the file name in the top left corner of the image with coordinates (10,10) pixels and is in the format SourceFileName:<file_name>
-        Each text source starts in a new line and has the file name followed by colon and the actual information
-        Always include the source name from the image or text for each fact you use in the response in the format: [filename]
-        Answer the following question using only the data provided in the sources below.
-        If asking a clarifying question to the user would help, ask the question.
-        Be brief in your answers.
-        For tabular information return it as an html table. Do not return markdown format.
-        The text and image source can be the same file name, don't use the image title when citing the image source, only use the file name as mentioned
-        If you cannot answer using the sources below, say you don't know. Return just the answer without any input texts.
-        {follow_up_questions_prompt}
-        {injected_prompt}
-        """
+        return """You are an advanced AI assistant acting as a senior financial regulator with expertise in organizational compliance and risk management. Your role is to provide authoritative guidance on financial regulations, compliance requirements, and best practices for organizations across various sectors.
+
+            Key points to consider:
+            1. Interpret and explain complex financial regulations in clear, actionable terms.
+            2. Provide insights on regulatory compliance, risk assessment, and governance structures.
+            3. Offer guidance on reporting requirements, audit processes, and regulatory examinations.
+            4. Discuss implications of new or changing regulations on organizational operations.
+            5. Address issues related to anti-money laundering (AML), know your customer (KYC), and other financial crime prevention measures.
+            6. Explain regulatory expectations for internal controls, data protection, and cybersecurity.
+
+            When analyzing documents:
+            - Each image source has the file name in the top left corner (coordinates 10,10) and bottom left corner (coordinates 10,780) in the format SourceFileName:<file_name>
+            - Text sources begin on a new line with the file name, followed by a colon and the information.
+            - Cite sources as [filename] for each fact used.
+            - Use only the provided sources to answer questions.
+            - Present tabular data in HTML format, not markdown.
+            - If clarification is needed, ask concise, relevant questions.
+            - If the information is not in the sources, state that you don't have sufficient information to answer.
+
+            Approach your responses as a regulatory authority would:
+            - Prioritize accuracy, compliance, and risk mitigation in your advice.
+            - Highlight potential regulatory issues or compliance gaps.
+            - Suggest steps for remediation or improvement where applicable.
+            - Be concise but comprehensive in your explanations.
+
+            {follow_up_questions_prompt}
+            {injected_prompt}"""
 
     async def run_until_final_call(
         self,
@@ -131,6 +162,67 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
         )
 
         query_text = self.get_search_query(chat_completion, original_user_query)
+        
+        kernel = Kernel()
+        service_id = "default_1"
+        kernel.add_service(
+            AzureChatCompletion(
+                service_id=service_id,
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+            ),
+        )
+        logging.basicConfig(
+            format="[%(asctime)s - %(name)s:%(lineno)d - %(levelname)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        logging.getLogger("kernel").setLevel(logging.DEBUG)
+
+        plugins_directory = "prompt_template_samples"
+        
+        kernel.add_plugin(plugin=ApiPlugin(), plugin_name="api")
+        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="KYBData")
+        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="Email")
+
+            
+        #chat = ChatHistory()
+        question = f"""Analyze the following user input which contains both current query and chat history, then determine the most appropriate action:
+            User Input: {query_text}
+            
+            if you decide to call "FetchBusinessData" dont worry about parameters or API key. They are already provided in function code. Just call function and return response and store it in result.final_answer.
+
+            If the context is related to KYB (Know Your Business) or KYC (Know Your Customer), Fetch data from FetchBusinessData and create a report for that data using KYBData.
+            If the context is related to generating a KYB report, Fetch data from FetchBusinessData and create a report for that data using KYBData.
+            If the context is not related to KYB or KYC, respond with "No relevant function available".
+
+            Respond with only one of the above options.""",
+        
+    
+        # Configure planner options
+        options = FunctionCallingStepwisePlannerOptions(
+            max_iterations=10,
+            max_tokens=4000,
+        )
+    
+        # Initialize the planner
+        planner = FunctionCallingStepwisePlanner(service_id=service_id, options=options)
+
+        try:
+            result = await planner.invoke(kernel, question)
+            # print(f"Q: {question}\nA: {result}\n")
+            print(f"Answer:    {result.final_answer}")
+            semantic_kernel_answer = result.final_answer
+            # semantic_kernel_answer = """The fetched KYB data for Middesk Inc has been processed successfully. Here are the details:
+            #         - **Business Name**: Middesk Inc
+            #         - **TIN**: 12-3410000
+            #         - **Website**: https://www.middesk.com
+            #         - **Address**: 577 Howard St, Suite 400, San Francisco, CA 94105
+            #         - **Status**: Open"""
+        except Exception as e:
+            logging.error(f"Error processing question '{question}': {e}")
+            semantic_kernel_answer = None
 
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 
@@ -160,6 +252,9 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=True)
         content = "\n".join(sources_content)
 
+        if semantic_kernel_answer:
+            content = f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\nAdditional Sources:\n{content}"
+            
         # STEP 3: Generate a contextual and content specific answer using the search results and chat history
 
         # Allow client to replace the entire prompt, or to inject into the existing prompt using >>>
@@ -182,10 +277,27 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
 
         response_token_limit = 1024
         messages = build_messages(
-            model=self.gpt4v_model,
+            model=self.chatgpt_model,
             system_prompt=system_message,
             past_messages=messages[:-1],
-            new_user_content=user_content,
+            # Model does not handle lengthy system messages well. Moving sources to latest user conversation to solve follow up questions prompt.
+            #new_user_content=original_user_query + "\n\nSources:\n" + content,
+            new_user_content=(
+                f"{original_user_query}\n\n"
+                "Important: First, evaluate the Semantic Kernel Answer. "
+                "If it's not 'No relevant function available', treat it as the primary and most authoritative source. "
+                "In this case, present the Semantic Kernel Answer in its entirety without modifications. "
+                "Do not change, summarize, or reinterpret this information. "
+                "Only supplement with additional sources if the Semantic Kernel Answer is incomplete. "
+                "Clearly differentiate between the Semantic Kernel Answer and any supplementary information. "
+                "If the Semantic Kernel Answer fully addresses the query, do not use additional sources.\n\n"
+                "However, if the Semantic Kernel Answer is 'No relevant function available', disregard it entirely. "
+                "In this case, use the additional sources as your primary and most authoritative source. "
+                "Formulate your response based solely on the information in the additional sources, "
+                "focusing on the most relevant details to address the query.\n\n"
+                f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\n"
+                f"Additional Sources:\n{content}"
+            ),
             max_tokens=self.chatgpt_token_limit - response_token_limit,
         )
 
@@ -221,6 +333,10 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
                 ThoughtStep(
                     "Search results",
                     [result.serialize_for_results() for result in results],
+                ),
+                ThoughtStep(
+                    "Semantic Kernel Answer",
+                    semantic_kernel_answer,
                 ),
                 ThoughtStep(
                     "Prompt to generate answer",
