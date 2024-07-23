@@ -8,7 +8,7 @@ import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { SpeechOutputBrowser } from "./SpeechOutputBrowser";
 import { SpeechOutputAzure } from "./SpeechOutputAzure";
-
+import { copyTextToClipboard } from "../../utils";
 interface Props {
     answer: ChatAppResponse;
     isSelected?: boolean;
@@ -21,10 +21,12 @@ interface Props {
     showSpeechOutputBrowser?: boolean;
     showSpeechOutputAzure?: boolean;
     speechUrl: string | null;
+    question: string;
 }
 
 export const Answer = ({
     answer,
+    question,
     isSelected,
     isStreaming,
     onCitationClicked,
@@ -42,12 +44,49 @@ export const Answer = ({
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
+
+
+const sendFeedback = (isPositive: boolean) => {
+    const subject = encodeURIComponent(`Chatbot Feedback: ${isPositive ? "Good" : "Bad"}`);
+    const body = encodeURIComponent(`Feedback: ${isPositive ? "Good" : "Bad"}\n\nQuestion: ${question}\n\nAnswer: ${answer.message.content}`);
+
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=feedback@flatironsai.com&su=${subject}&body=${body}`;
+
+    window.open(gmailComposeUrl, "_blank");
+};
+
+    const handleCopy = () => {
+        const textToCopy = answer.message.content.replace(/\[\^\d+?\]/g, "");
+        copyTextToClipboard(textToCopy);
+    };
+
     return (
         <Stack className={`${styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
                     <AnswerIcon />
                     <div>
+                        <IconButton
+                            style={{ color: "green" }}
+                            iconProps={{ iconName: "Like" }}
+                            title="Thumbs up"
+                            ariaLabel="Thumbs up"
+                            onClick={() => sendFeedback(true)}
+                        />
+                        <IconButton
+                            style={{ color: "red" }}
+                            iconProps={{ iconName: "Dislike" }}
+                            title="Thumbs down"
+                            ariaLabel="Thumbs down"
+                            onClick={() => sendFeedback(false)}
+                        />
+                        <IconButton
+                            style={{ color: "black" }}
+                            iconProps={{ iconName: "Copy" }}
+                            title="Copy answer"
+                            ariaLabel="Copy answer"
+                            onClick={handleCopy}
+                        />
                         <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}

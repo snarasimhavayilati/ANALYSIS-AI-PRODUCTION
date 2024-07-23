@@ -38,6 +38,7 @@
     display: flex;
     list-style: none;
     padding-left: 0;
+    justify-content: center;
 }
 
 .headerNavPageLink {
@@ -68,6 +69,17 @@
     margin-left: 40px;
 }
 
+.headerNav {
+    flex-grow: 1;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+}
+
+
+
 .microsoftLogo {
     height: 23px;
     font-weight: 600;
@@ -93,11 +105,12 @@
 .navButton:hover {
   background-color: darkslategray; 
 }
-
-.footer {
+footer {
     position: relative;
-    text-align: right;
-    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px 20px;
 }
 
 .footerButton {
@@ -108,21 +121,57 @@
     cursor: pointer;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    position: absolute;
-    bottom: 45px;
-    right: 20px;
+    margin-left: 10px;
+}
+
+.downloadButton {
+    color: rgba(36,189,177,255) !important;
+    margin-left: 10px;
+}
+
+.downloadButton i {
+    font-size: 20px;
 }
 
 .footerButton:hover {
     background-color: darkslategray;
 }
 
+.downloadButton:hover {
+    color: darkslategray !important;
+}
+
 
 @media (max-width: 1240px) {
-    .footerButton {
-        position: relative;
-        bottom: 10px;
+    .footer {
+        align-items: flex-end;
+    }
+
+    .footerButton, .downloadButton {
         margin-top: 10px;
-        right: 15px;
+        margin-left: 0;
+    }
+    .headerContainer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerNav {
+        margin: 10px 0;
+    }
+
+    .headerNavList {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .headerNavLeftMargin {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .headerRight {
+        justify-content: center;
+        margin-top: 10px;
     }
 }

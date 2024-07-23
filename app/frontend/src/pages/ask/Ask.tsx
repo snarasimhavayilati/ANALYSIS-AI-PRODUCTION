@@ -248,6 +248,7 @@ export function Component(): JSX.Element {
                     <div className={styles.askAnswerContainer}>
                         <Answer
                             answer={answer}
+                            question={lastQuestionRef.current}
                             isStreaming={false}
                             onCitationClicked={x => onShowCitation(x)}
                             onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab)}

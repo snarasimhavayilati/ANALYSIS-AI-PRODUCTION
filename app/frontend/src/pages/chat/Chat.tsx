@@ -141,7 +141,6 @@ const Chat = () => {
 
     const makeApiRequest = async (question: string) => {
         lastQuestionRef.current = question;
-
         error && setError(undefined);
         setIsLoading(true);
         setActiveCitation(undefined);
@@ -342,7 +341,7 @@ const Chat = () => {
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(36,189,177,255)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Chat with Tai's data</h1>
+                            <h1 className={styles.chatEmptyStateTitle}>Flatirons AI's Compliance Chatbot</h1>
                             <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
                             <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
                         </div>
@@ -356,6 +355,7 @@ const Chat = () => {
                                             <Answer
                                                 isStreaming={true}
                                                 key={index}
+                                                question={lastQuestionRef.current}
                                                 answer={streamedAnswer[1]}
                                                 isSelected={false}
                                                 onCitationClicked={c => onShowCitation(c, index)}
@@ -378,6 +378,7 @@ const Chat = () => {
                                             <Answer
                                                 isStreaming={false}
                                                 key={index}
+                                                question={lastQuestionRef.current}
                                                 answer={answer[1]}
                                                 isSelected={selectedAnswer === index && activeAnalysisPanelTab !== undefined}
                                                 onCitationClicked={c => onShowCitation(c, index)}

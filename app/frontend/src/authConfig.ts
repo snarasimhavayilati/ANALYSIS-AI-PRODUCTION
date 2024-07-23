@@ -220,16 +220,24 @@ export const getToken = async (client: IPublicClientApplication): Promise<string
 export const getUsername = async (client: IPublicClientApplication): Promise<string | null> => {
     const activeAccount = client.getActiveAccount();
     if (activeAccount) {
-        return activeAccount.username;
+        return extractFirstName(activeAccount.name) || activeAccount.username;
     }
 
     const appServicesToken = await getAppServicesToken();
     if (appServicesToken?.user_claims) {
-        return appServicesToken.user_claims.preferred_username;
+        return extractFirstName(appServicesToken.user_claims.name) || appServicesToken.user_claims.preferred_username;
     }
 
     return null;
 };
+
+function extractFirstName(fullName: string | undefined): string | null {
+    if (!fullName) return null;
+
+    // Split the full name and return the first part
+    const nameParts = fullName.split(" ");
+    return nameParts[0] || null;
+}
 
 /**
  * Retrieves the token claims of the active account.
@@ -250,3 +258,4 @@ export const getTokenClaims = async (client: IPublicClientApplication): Promise<
 
     return undefined;
 };
+
