@@ -101,7 +101,7 @@ var chatGpt = {
   modelName: !empty(chatGptModelName) ? chatGptModelName : startsWith(openAiHost, 'azure') ? 'gpt-35-turbo' : 'gpt-3.5-turbo'
   deploymentName: !empty(chatGptDeploymentName) ? chatGptDeploymentName : 'chat'
   deploymentVersion: !empty(chatGptDeploymentVersion) ? chatGptDeploymentVersion : '0613'
-  deploymentCapacity: chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 30
+  deploymentCapacity: chatGptDeploymentCapacity != 0 ? chatGptDeploymentCapacity : 60
 }
 
 param embeddingModelName string = ''
@@ -113,14 +113,14 @@ var embedding = {
   modelName: !empty(embeddingModelName) ? embeddingModelName : 'text-embedding-ada-002'
   deploymentName: !empty(embeddingDeploymentName) ? embeddingDeploymentName : 'embedding'
   deploymentVersion: !empty(embeddingDeploymentVersion) ? embeddingDeploymentVersion : '2'
-  deploymentCapacity: embeddingDeploymentCapacity != 0 ? embeddingDeploymentCapacity : 30
+  deploymentCapacity: embeddingDeploymentCapacity != 0 ? embeddingDeploymentCapacity : 60
   dimensions: embeddingDimensions != 0 ? embeddingDimensions : 1536
 }
 
 param gpt4vModelName string = 'gpt-4o'
 param gpt4vDeploymentName string = 'gpt-4o'
 param gpt4vModelVersion string = '2024-05-13'
-param gpt4vDeploymentCapacity int = 10
+param gpt4vDeploymentCapacity int = 60
 
 param tenantId string = tenant().tenantId
 param authTenantId string = ''

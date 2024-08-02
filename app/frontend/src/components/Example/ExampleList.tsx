@@ -3,15 +3,17 @@ import { Example } from "./Example";
 import styles from "./Example.module.css";
 
 const DEFAULT_EXAMPLES: string[] = [
-    "What is included in my Northwind Health Plus plan that is not in standard?",
-    "What happens in a performance review?",
-    "What does a Product Manager do?"
+    "Do you have the bank secrecy act regulation?",
+    "Please write an email to a customer who has made a payment with an account with insufficient funds?",
+    "Create a detailed policy for outbound debt collection agents.",
+    "What KYC regulations are required for payment companies?"
 ];
 
 const GPT4V_EXAMPLES: string[] = [
-    "Compare the impact of interest rates and GDP in financial markets.",
-    "What is the expected trend for the S&P 500 index over the next five years? Compare it to the past S&P 500 performance",
-    "Can you identify any correlation between oil prices and stock market trends?"
+    "Do you have the bank secrecy act regulation?",
+    "Please write an email to a customer who has made a payment with an account with insufficient funds?",
+    "Create a detailed policy for outbound debt collection agents.",
+    "What KYC regulations are required for payment companies?"
 ];
 
 interface Props {

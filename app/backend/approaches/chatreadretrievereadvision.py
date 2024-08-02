@@ -168,10 +168,12 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
         kernel.add_service(
             AzureChatCompletion(
                 service_id=service_id,
-                api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                api_version="2023-05-15",
+                #deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
                 deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+                api_key="asdjaklsdja",
+                #api_key="c488fdb8ed5c42d3b86c62102102caf5",
+                endpoint="https://cog-rjth475fytae6.openai.azure.com/"
             ),
         )
         logging.basicConfig(
@@ -283,21 +285,11 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
             # Model does not handle lengthy system messages well. Moving sources to latest user conversation to solve follow up questions prompt.
             #new_user_content=original_user_query + "\n\nSources:\n" + content,
             new_user_content=(
-                f"{original_user_query}\n\n"
-                "Important: First, evaluate the Semantic Kernel Answer. "
-                "If it's not 'No relevant function available', treat it as the primary and most authoritative source. "
-                "In this case, present the Semantic Kernel Answer in its entirety without modifications. "
-                "Do not change, summarize, or reinterpret this information. "
-                "Only supplement with additional sources if the Semantic Kernel Answer is incomplete. "
-                "Clearly differentiate between the Semantic Kernel Answer and any supplementary information. "
-                "If the Semantic Kernel Answer fully addresses the query, do not use additional sources.\n\n"
-                "However, if the Semantic Kernel Answer is 'No relevant function available', disregard it entirely. "
-                "In this case, use the additional sources as your primary and most authoritative source. "
-                "Formulate your response based solely on the information in the additional sources, "
-                "focusing on the most relevant details to address the query.\n\n"
-                f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\n"
-                f"Additional Sources:\n{content}"
-            ),
+            f"{original_user_query}\n\n"
+            "Important: First, neglect the Semantic Kernel Answer. "
+            f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\n"
+            f"Additional Sources:\n{content}"
+        ),
             max_tokens=self.chatgpt_token_limit - response_token_limit,
         )
 

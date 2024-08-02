@@ -14,8 +14,6 @@ import { getUsername } from "../../authConfig";
 import { useMsal } from "@azure/msal-react";
 import { IconButton } from "@fluentui/react";
 
-
-
 const Layout = () => {
     const { instance } = useMsal();
     const [username, setUsername] = useState("");
@@ -27,19 +25,18 @@ const Layout = () => {
         fetchUsername();
     }, []);
 
-
-        const handleDownload = () => {
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: "text/html" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "page_content.html";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        };
+    const handleDownload = () => {
+        const htmlContent = document.documentElement.outerHTML;
+        const blob = new Blob([htmlContent], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "page_content.html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div className={styles.layout}>
@@ -75,13 +72,13 @@ const Layout = () => {
                                 </a>
                             </li> */}
                             <li className={styles.headerNavLeftMargin}>
-                                <a href="https://flatironsai.com" target="_blank" rel="noopener noreferrer">
+                                <a href="https://flatironsai.com/enterprise-copilot/" target="_blank" rel="noopener noreferrer">
                                     <button className={styles.navButton}>Learn About Copilot Enterprise</button>
                                 </a>
                             </li>
                             <li className={styles.headerNavLeftMargin}>
                                 <a href="https://flatironsai.com" target="_blank" rel="noopener noreferrer">
-                                    <button className={styles.navButton}>Support and Learning</button>
+                                    {/* <button className={styles.navButton}>Support and Learning</button> */}
                                 </a>
                             </li>
                         </ul>
@@ -90,9 +87,7 @@ const Layout = () => {
                         {username && <span className={styles.welcomeMessage}>Hello, {username}</span>}
                         {useLogin && <LoginButton />}
                     </div> */}
-                    <div className={styles.headerRight}>
-                        {useLogin && <LoginButton />}
-                    </div>
+                    <div className={styles.headerRight}>{useLogin && <LoginButton />}</div>
                 </div>
             </header>
 

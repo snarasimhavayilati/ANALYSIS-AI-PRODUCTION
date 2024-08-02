@@ -1,6 +1,7 @@
 import os
+import logging
+import asyncio
 from typing import Any, Coroutine, List, Literal, Optional, Union, overload
-
 from azure.search.documents.aio import SearchClient
 from azure.search.documents.models import VectorQuery
 from openai import AsyncOpenAI, AsyncStream
@@ -11,22 +12,15 @@ from openai.types.chat import (
     ChatCompletionToolParam,
 )
 from openai_messages_token_helper import build_messages, get_token_limit
-
 from approaches.approach import ThoughtStep
 from approaches.chatapproach import ChatApproach
 from core.authentication import AuthenticationHelper
-
-import logging
-
-import asyncio
-
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatCompletion
 from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
 from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
 from semantic_kernel.contents.chat_history import ChatHistory
 from semantic_kernel.functions.kernel_arguments import KernelArguments
-
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import (
     AzureChatPromptExecutionSettings, OpenAIChatPromptExecutionSettings
 )
@@ -78,13 +72,31 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
     @property
     def system_message_chat_conversation(self):
-        return """Assistant helps the company employees with their healthcare plan questions, and questions about the employee handbook. Be brief in your answers.
-        Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question.
-        For tabular information return it as an html table. Do not return markdown format. If the question is not in English, answer in the language used in the question.
-        Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, for example [info1.txt]. Don't combine sources, list each source separately, for example [info1.txt][info2.pdf].
-        {follow_up_questions_prompt}
-        {injected_prompt}
-        """
+        return """You are an advanced AI assistant specializing in financial regulations and compliance. Your role is to provide accurate, concise guidance based on official regulatory sources. Approach each query as a knowledgeable regulatory advisor would.
+
+                Key instructions:
+                1. Answer ONLY using facts from the provided sources below. If information is insufficient, state that you don't have enough information to provide a complete answer.
+                2. Do not generate answers without referencing the given sources.
+                3. Be concise yet thorough in your responses, prioritizing clarity and accuracy.
+                4. If a clarifying question would help, ask it briefly and professionally.
+                5. Present tabular information in HTML format, not markdown.
+                6. If the question is in a language other than English, respond in that language.
+
+                Source citation:
+                - Each source has a name followed by a colon and the actual information.
+                - Always include the source name for each fact used in your response.
+                - Use square brackets to reference sources, e.g., [info1.txt].
+                - List sources separately, e.g., [info1.txt][info2.pdf]. Do not combine sources.
+
+                Regulatory focus:
+                - Interpret regulations with a focus on organizational compliance and risk management.
+                - Highlight key compliance requirements, potential risks, and best practices.
+                - When relevant, briefly mention implications for governance, reporting, or audit processes.
+                - Address any apparent regulatory gaps or areas needing clarification, if applicable.
+
+                {follow_up_questions_prompt}
+                {injected_prompt}
+                """
 
     @overload
     async def run_until_final_call(
@@ -157,10 +169,6 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             new_user_content=user_query_request,
             max_tokens=self.chatgpt_token_limit - query_response_token_limit,
         )
-
-        # print("query_MSG_started")
-        # print(query_messages)
-        # print("query_MSG_ended")
         
         chat_completion: ChatCompletion = await self.openai_client.chat.completions.create(
             messages=query_messages,  # type: ignore
@@ -171,32 +179,18 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             n=1,
             tools=tools,
         )
-        #print(chat_completion.choices[0])
+        
         query_text = self.get_search_query(chat_completion, original_user_query)
         
-        # print("query_text_started")
-        # print(query_text)
-        # print("query_text_ended")
-        # Initialize the kernel
         kernel = Kernel()
-        #Add Azure OpenAI chat completion
-        # kernel.add_service(await self.openai_client.chat.completions.create(
-        #     messages=query_messages,  # type: ignore
-        #     # Azure OpenAI takes the deployment name as the model name
-        #     model=self.chatgpt_deployment if self.chatgpt_deployment else self.chatgpt_model,
-        #     temperature=0.0,  # Minimize creativity for search query generation
-        #     max_tokens=query_response_token_limit,  # Setting too low risks malformed JSON, setting too high may affect performance
-        #     n=1,
-        #     tools=tools
-        # ))
         service_id = "default_1"
         kernel.add_service(
             AzureChatCompletion(
                 service_id=service_id,
-                api_version="2023-05-15",  # Use the appropriate version
-                deployment_name="sematic-kernel-test",
-                api_key="ce2cdbcb860b41ed95723ae3aba17bc7",
-                endpoint="https://cog-qpy3j27u2zsoo.openai.azure.com/"
+                api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+                deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
+                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
             ),
         )
         logging.basicConfig(
@@ -207,58 +201,12 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
         plugins_directory = "prompt_template_samples"
         
-        api_plugin = kernel.add_plugin(plugin=ApiPlugin(), plugin_name="api")
-        kybplugin_function = kernel.add_plugin(parent_directory=plugins_directory, plugin_name="KYBData")
-        APIDataFunction = api_plugin["FetchBusinessData"]
-        KYBReportFunction = kybplugin_function["kyb_data"]
-        
-        execution_settings = AzureChatPromptExecutionSettings(
-            # Azure OpenAI takes the deployment name as the model name
-            model=self.chatgpt_deployment if self.chatgpt_deployment else self.chatgpt_model,
-            temperature=0.0,  # Minimize creativity for search query generation
-            max_tokens=query_response_token_limit,  # Setting too low risks malformed JSON, setting too high may affect performance
-            n=1,
-            tools=tools,
-            tool_choice="auto",
-            function_call_behavior=FunctionCallBehavior.EnableFunctions(auto_invoke=True, filters={"included_plugins": ["api","KYBData"]})
-            )
-        
-        #execution_settings.function_call_behavior = FunctionCallBehavior.EnableFunctions(auto_invoke=True, filters={"included_plugins": ["Testing"]})
-        
-        # test_func = kernel.add_function(
-        #     prompt = "{{$chat_history}}{{$user_input}}",
-        #     plugin_name="Lights",
-        #     function_name="get_lights",
-        # )
-        
-        # # Create a planner
-        # planner = ActionPlanner(kernel)
+        kernel.add_plugin(plugin=ApiPlugin(), plugin_name="api")
+        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="KYBData")
+        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="Email")
 
-        # # Define the goal for the planner
-        # async def process_user_input(user_input, chat_history):
-        #     goal = f"""
-        #     Analyze the following user input and chat history, then determine the most appropriate action:
-        #     User Input: {user_input}
-        #     Chat History: {chat_history}
             
-        #     If the context is related to KYB (Know Your Business) or KYC (Know Your Customer), use the FetchBusinessData function.
-        #     If the context is related to generating a KYB report, use the kyb_data function.
-        #     If the context is not related to KYB or KYC, respond with "No relevant function available".
-            
-        #     Respond with the name of the function to use or the message "No relevant function available".
-        #     """
-            
-        #     # Get the plan
-        #     plan = await planner.create_plan(goal)
-            
-        #     # Execute the plan
-        #     result = await planner.execute_plan(plan)
-            
-        #     return result
-
-            # List of questions to process
-            
-        chat = ChatHistory()
+        #chat = ChatHistory()
         question = f"""Analyze the following user input which contains both current query and chat history, then determine the most appropriate action:
             User Input: {query_text}
             
@@ -283,59 +231,19 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         try:
             result = await planner.invoke(kernel, question)
             # print(f"Q: {question}\nA: {result}\n")
-            # print()
-            # print()
             print(f"Answer:    {result.final_answer}")
-            #print(result.final_answer)
-            # print(result.chat_history)
-            # print("Checking Format")
-            # print()
-            # print()
+            semantic_kernel_answer = result.final_answer
+            # semantic_kernel_answer = """The fetched KYB data for Middesk Inc has been processed successfully. Here are the details:
+            #         - **Business Name**: Middesk Inc
+            #         - **TIN**: 12-3410000
+            #         - **Website**: https://www.middesk.com
+            #         - **Address**: 577 Howard St, Suite 400, San Francisco, CA 94105
+            #         - **Status**: Open"""
+            #semantic_kernel_answer = None
         except Exception as e:
             logging.error(f"Error processing question '{question}': {e}")
-            
-        arguments = KernelArguments(settings=execution_settings)
-        # print("Response")
-        # print(chat_completion.choices[0])
-        # print("Responses_1")
-        #arguments["user_input"] = chat_completion.choices[0].message.content
-        #print("User Input")
-        #print(query_messages)
-        arguments["user_input"] = query_messages
-        arguments["chat_history"] = chat
-        #print("Result")
-        #result = await kernel.invoke(test_func, arguments= arguments)
-        # response_1 = await kernel.invoke(APIDataFunction, arguments= arguments)
-        # # Process the user input
-        # #result = await process_user_input(arguments["user_input"], arguments["chat_history"])
-        # result_1 = await kernel.invoke(KYBReportFunction, input=response_1)
-        # print("Response_1")
-        # print(response_1)
-        # print(result_1)
-        # print("Result_1")
-        # #print(result)
-        # #print(result)
-        # #print(result)
-        # print("New code")
+            semantic_kernel_answer = None
         
-        # print("sematic start")
-        # chat_completion_semantic : AzureChatCompletion = kernel.get_service(type=ChatCompletionClientBase)
-        
-        #content = "You are an AI assistant that helps people find information."
-        #chat.add_system_message(content)
-        #chat.add_user_message("Gets a list of lights and their current state")
-        #stream_1 = chat_completion_semantic.get_chat_message_contents(chat_history=chat , settings = execution_settings)
-        #print(stream_1)
-        #print("Stream 1 ends here")
-        # stream = chat_completion_semantic.get_streaming_chat_message_contents(
-        #     chat_history=chat, settings = execution_settings
-        # )
-        # print(stream)
-        # async for text in stream:
-        #     print(str(text[0]), end="")  # end = "" to avoid newlines
-        
-        print("semantic end")
-        #query_text = self.get_search_query(chat_completion, original_user_query)
         
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 
@@ -359,6 +267,9 @@ class ChatReadRetrieveReadApproach(ChatApproach):
 
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=False)
         content = "\n".join(sources_content)
+        
+        if semantic_kernel_answer:
+            content = f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\nAdditional Sources:\n{content}"
 
         # STEP 3: Generate a contextual and content specific answer using the search results and chat history
 
@@ -369,12 +280,29 @@ class ChatReadRetrieveReadApproach(ChatApproach):
         )
 
         response_token_limit = 1024
+        
         messages = build_messages(
             model=self.chatgpt_model,
             system_prompt=system_message,
             past_messages=messages[:-1],
             # Model does not handle lengthy system messages well. Moving sources to latest user conversation to solve follow up questions prompt.
-            new_user_content=original_user_query + "\n\nSources:\n" + content,
+            #new_user_content=original_user_query + "\n\nSources:\n" + content,
+            new_user_content=(
+            f"{original_user_query}\n\n"
+            "Important: First, evaluate the Semantic Kernel Answer. "
+            "If it's not 'No relevant function available', treat it as the primary and most authoritative source. "
+            "In this case, present the Semantic Kernel Answer in its entirety without modifications. "
+            "Do not change, summarize, or reinterpret this information. "
+            "Only supplement with additional sources if the Semantic Kernel Answer is incomplete. "
+            "Clearly differentiate between the Semantic Kernel Answer and any supplementary information. "
+            "If the Semantic Kernel Answer fully addresses the query, do not use additional sources.\n\n"
+            "However, if the Semantic Kernel Answer is 'No relevant function available', disregard it entirely. "
+            "In this case, use the additional sources as your primary and most authoritative source. "
+            "Formulate your response based solely on the information in the additional sources, "
+            "focusing on the most relevant details to address the query.\n\n"
+            f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\n"
+            f"Additional Sources:\n{content}"
+        ),
             max_tokens=self.chatgpt_token_limit - response_token_limit,
         )
 
@@ -409,6 +337,10 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                     [result.serialize_for_results() for result in results],
                 ),
                 ThoughtStep(
+                    "Semantic Kernel Answer",
+                    semantic_kernel_answer,
+                ),
+                ThoughtStep(
                     "Prompt to generate answer",
                     [str(message) for message in messages],
                     (
@@ -420,7 +352,6 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             ],
         }
 
-        print("coroutie")
         chat_coroutine = self.openai_client.chat.completions.create(
             # Azure OpenAI takes the deployment name as the model name
             model=self.chatgpt_deployment if self.chatgpt_deployment else self.chatgpt_model,
@@ -430,16 +361,4 @@ class ChatReadRetrieveReadApproach(ChatApproach):
             n=1,
             stream=should_stream,
         )
-        
-        print("start")
-        print(chat_coroutine)
-        print("stop")
-         
-        # Get the response from the AI
-        #result = (await chat_completion.get_chat_message_contents(
-         #   chat_history=history,
-          #  settings=execution_settings,
-           # kernel=kernel,
-            #,
-        #))[0]###
         return (extra_info, chat_coroutine)

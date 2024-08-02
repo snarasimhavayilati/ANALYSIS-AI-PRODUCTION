@@ -49,7 +49,6 @@ async def main():
     # Add the KYBData plugin from the specified directory
     kernel.add_plugin(parent_directory=plugins_directory, plugin_name="KYBData")
    
-    m
 # Run the main function asynchronously
 if __name__ == "__main__":
     asyncio.run(main())
