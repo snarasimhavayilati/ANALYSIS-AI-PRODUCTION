@@ -106,6 +106,7 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
 
             Approach your responses as a regulatory authority would:
             - Prioritize accuracy, compliance, and risk mitigation in your advice.
+            - If you have a choice between the actual regulation and handbooks or manuals give priority to the actual regulations.
             - Highlight potential regulatory issues or compliance gaps.
             - Suggest steps for remediation or improvement where applicable.
             - Be concise but comprehensive in your explanations.
@@ -152,7 +153,8 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
             new_user_content=user_query_request,
             max_tokens=self.chatgpt_token_limit - query_response_token_limit,
         )
-
+        print("Tokens used")
+        print(self.chatgpt_token_limit)
         chat_completion: ChatCompletion = await self.openai_client.chat.completions.create(
             model=query_deployment if query_deployment else query_model,
             messages=query_messages,

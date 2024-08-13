@@ -89,6 +89,8 @@ class ChatReadRetrieveReadApproach(ChatApproach):
                 - List sources separately, e.g., [info1.txt][info2.pdf]. Do not combine sources.
 
                 Regulatory focus:
+                - Given a choice between "Comptroller's Handbooks" or "(Regulation)" prioritize "(Regulation)" .
+                - Given a choice between "Examination Manual" or "(Regulation)" prioritize "(Regulation)" .
                 - Interpret regulations with a focus on organizational compliance and risk management.
                 - Highlight key compliance requirements, potential risks, and best practices.
                 - When relevant, briefly mention implications for governance, reporting, or audit processes.
