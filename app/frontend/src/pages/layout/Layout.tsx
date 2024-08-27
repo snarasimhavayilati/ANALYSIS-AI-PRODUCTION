@@ -77,8 +77,13 @@ const Layout = () => {
                                 </a>
                             </li>
                             <li className={styles.headerNavLeftMargin}>
-                                <a href="https://flatironsai.com" target="_blank" rel="noopener noreferrer">
-                                    {/* <button className={styles.navButton}>Support and Learning</button> */}
+                                <a href="https://flatironsai.com/useful-tips/" target="_blank" rel="noopener noreferrer">
+                                    {<button className={styles.navButton}>Useful Tips</button>}
+                                </a>
+                            </li>
+                            <li className={styles.headerNavLeftMargin}>
+                                <a href="https://flatironsai.com/beta-feedback/" target="_blank" rel="noopener noreferrer">
+                                    {<button className={styles.navButton}>Feedback?</button>}
                                 </a>
                             </li>
                         </ul>
@@ -100,9 +105,9 @@ const Layout = () => {
                     onClick={handleDownload}
                     className={styles.downloadButton}
                 />
-                <a href="https://flatironsai.com" target="_blank" rel="noopener norefererrer">
+                {/* <a href="https://flatironsai.com/beta-feedback/" target="_blank" rel="noopener norefererrer">
                     <button className={styles.footerButton}>Feedback?</button>
-                </a>
+                </a> */}
             </footer>
         </div>
     );

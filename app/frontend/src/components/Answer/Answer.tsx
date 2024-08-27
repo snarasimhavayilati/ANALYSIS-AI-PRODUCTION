@@ -44,16 +44,14 @@ export const Answer = ({
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
+    const sendFeedback = (isPositive: boolean) => {
+        const subject = encodeURIComponent(`Chatbot Feedback: ${isPositive ? "Good" : "Bad"}`);
+        const body = encodeURIComponent(`Feedback: ${isPositive ? "Good" : "Bad"}\n\nQuestion: ${question}\n\nAnswer: ${answer.message.content}`);
 
+        const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=feedback@flatironsai.com&su=${subject}&body=${body}`;
 
-const sendFeedback = (isPositive: boolean) => {
-    const subject = encodeURIComponent(`Chatbot Feedback: ${isPositive ? "Good" : "Bad"}`);
-    const body = encodeURIComponent(`Feedback: ${isPositive ? "Good" : "Bad"}\n\nQuestion: ${question}\n\nAnswer: ${answer.message.content}`);
-
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=feedback@flatironsai.com&su=${subject}&body=${body}`;
-
-    window.open(gmailComposeUrl, "_blank");
-};
+        window.open(gmailComposeUrl, "_blank");
+    };
 
     const handleCopy = () => {
         const textToCopy = answer.message.content.replace(/\[\^\d+?\]/g, "");
@@ -87,14 +85,14 @@ const sendFeedback = (isPositive: boolean) => {
                             ariaLabel="Copy answer"
                             onClick={handleCopy}
                         />
-                        <IconButton
+                        {/* <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}
                             title="Show thought process"
                             ariaLabel="Show thought process"
                             onClick={() => onThoughtProcessClicked()}
                             disabled={!answer.context.thoughts?.length}
-                        />
+                        /> */}
                         <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "ClipboardList" }}

@@ -341,7 +341,7 @@ const Chat = () => {
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(36,189,177,255)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Flatirons AI's Compliance Chatbot</h1>
+                            <h1 className={styles.chatEmptyStateTitle}>Compliance AI Co-Pilot</h1>
                             <h2 className={styles.chatEmptyStateSubtitle}>Ask me a question about compliance or give me an assignment</h2>
                             <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
                         </div>

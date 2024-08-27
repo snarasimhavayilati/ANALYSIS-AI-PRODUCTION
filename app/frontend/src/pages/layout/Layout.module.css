@@ -6,7 +6,7 @@
 
 .header {
     background-color: #f2f2f2;
-    color:#222222;
+    color: #222222;
 }
 
 .headerContainer {
@@ -21,7 +21,7 @@
     display: flex;
     align-items: center;
     margin-right: 40px;
-    color:#222222;
+    color: #222222;
     text-decoration: none;
 }
 
@@ -78,32 +78,31 @@
     align-items: center;
 }
 
-
-
 .microsoftLogo {
     height: 23px;
     font-weight: 600;
-
 }
 
 .githubLogo {
     height: 20px;
-    fill:#222222;
+    fill: #222222;
 }
 
 .navButton {
-  background-color: rgba(36,189,177,255); 
-  color: black; 
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 4px;
-  text-align: center;
-  text-decoration: none;
+    font-size: 16px;
+    background-color: #063e56;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .navButton:hover {
-  background-color: darkslategray; 
+    background-color: darkslategray;
 }
 footer {
     position: relative;
@@ -114,7 +113,7 @@ footer {
 }
 
 .footerButton {
-    background-color: rgba(36,189,177,255);
+    background-color: rgba(36, 189, 177, 255);
     color: black;
     padding: 10px 20px;
     border: none;
@@ -125,7 +124,7 @@ footer {
 }
 
 .downloadButton {
-    color: rgba(36,189,177,255) !important;
+    color: rgba(36, 189, 177, 255) !important;
     margin-left: 10px;
 }
 
@@ -141,13 +140,13 @@ footer {
     color: darkslategray !important;
 }
 
-
 @media (max-width: 1240px) {
     .footer {
         align-items: flex-end;
     }
 
-    .footerButton, .downloadButton {
+    .footerButton,
+    .downloadButton {
         margin-top: 10px;
         margin-left: 0;
     }
