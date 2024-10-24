@@ -152,3 +152,5 @@ data/**/*.md5
 
 # Ignore entire data folder
 /data/
+/data_new/
+/data-old/
