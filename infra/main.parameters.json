@@ -69,7 +69,7 @@
       "value": "${AZURE_SEARCH_QUERY_SPELLER=lexicon}"
     },
     "searchServiceSemanticRankerLevel": {
-      "value": "${AZURE_SEARCH_SEMANTIC_RANKER=free}"
+      "value": "${AZURE_SEARCH_SEMANTIC_RANKER=standard}"
     },
     "storageAccountName": {
       "value": "${AZURE_STORAGE_ACCOUNT}"
@@ -84,7 +84,7 @@
       "value": "${AZURE_APP_SERVICE_PLAN}"
     },
     "appServiceSkuName": {
-      "value": "${AZURE_APP_SERVICE_SKU=B1}"
+      "value": "${AZURE_APP_SERVICE_SKU=P0V3}"
     },
     "backendServiceName": {
       "value": "${AZURE_APP_SERVICE}"

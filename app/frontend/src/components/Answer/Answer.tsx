@@ -64,7 +64,7 @@ export const Answer = ({
                 <Stack horizontal horizontalAlign="space-between">
                     <AnswerIcon />
                     <div>
-                        <IconButton
+                        {/* <IconButton
                             style={{ color: "green" }}
                             iconProps={{ iconName: "Like" }}
                             title="Thumbs up"
@@ -77,7 +77,7 @@ export const Answer = ({
                             title="Thumbs down"
                             ariaLabel="Thumbs down"
                             onClick={() => sendFeedback(false)}
-                        />
+                        /> */}
                         <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Copy" }}

@@ -104,7 +104,7 @@ export const UploadFile: React.FC<Props> = ({ className, disabled }: Props) => {
         <div className={`${styles.container} ${className ?? ""}`}>
             <div>
                 <Button id="calloutButton" icon={<Add24Regular />} disabled={disabled} onClick={handleButtonClick}>
-                    Manage file uploads
+                    Uploads
                 </Button>
 
                 {isCalloutVisible && (

@@ -3,17 +3,17 @@ import { Example } from "./Example";
 import styles from "./Example.module.css";
 
 const DEFAULT_EXAMPLES: string[] = [
-    "Do you have the bank secrecy act regulation?",
-    "Please write an email to a customer who has made a payment with an account with insufficient funds?",
-    "Create a detailed policy for outbound debt collection agents.",
-    "What KYC regulations are required for payment companies?"
+    "What is required for a payment company to become a PayFac?",
+    "Write an email to a customer of Flatirons Bank who has failed to make their installment loan payment.",
+    "We have an upcoming CRA audit from the OCC, what should the management team do to prepare?",
+    "Create a 5-question test on the Bank Secrecy Act, provide 3 possible answers for each question."
 ];
 
 const GPT4V_EXAMPLES: string[] = [
-    "Do you have the bank secrecy act regulation?",
-    "Please write an email to a customer who has made a payment with an account with insufficient funds?",
-    "Create a detailed policy for outbound debt collection agents.",
-    "What KYC regulations are required for payment companies?"
+    "What is required for a payment company to become a PayFac?",
+    "Write an email to a customer of Flatirons Bank who has failed to make their installment loan payment.",
+    "We have an upcoming CRA audit from the OCC, what should the management team do to prepare?",
+    "Create a 5-question test on the Bank Secrecy Act, provide 3 possible answers for each question."
 ];
 
 interface Props {

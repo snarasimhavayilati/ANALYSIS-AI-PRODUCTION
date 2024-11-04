@@ -33,7 +33,7 @@ from semantic_kernel.planners.function_calling_stepwise_planner import (
     FunctionCallingStepwisePlanner,
     FunctionCallingStepwisePlannerOptions,
 )
-from plugins.api_plugin import ApiPlugin
+#from plugins.api_plugin import ApiPlugin
 
 
 class ChatReadRetrieveReadVisionApproach(ChatApproach):
@@ -94,7 +94,7 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
             4. Discuss implications of new or changing regulations on organizational operations.
             5. Address issues related to anti-money laundering (AML), know your customer (KYC), and other financial crime prevention measures.
             6. Explain regulatory expectations for internal controls, data protection, and cybersecurity.
-
+            
             When analyzing documents:
             - Each image source has the file name in the top left corner (coordinates 10,10) and bottom left corner (coordinates 10,780) in the format SourceFileName:<file_name>
             - Text sources begin on a new line with the file name, followed by a colon and the information.
@@ -143,8 +143,10 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
         user_query_request = "Generate search query for: " + original_user_query
 
         query_response_token_limit = 100
-        query_model = self.chatgpt_model
-        query_deployment = self.chatgpt_deployment
+        # query_model = self.chatgpt_model
+        # query_deployment = self.chatgpt_deployment
+        query_model = self.gpt4v_model
+        query_deployment = self.gpt4v_deployment
         query_messages = build_messages(
             model=query_model,
             system_prompt=self.query_prompt_template,
@@ -165,69 +167,6 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
 
         query_text = self.get_search_query(chat_completion, original_user_query)
         
-        kernel = Kernel()
-        service_id = "default_1"
-        kernel.add_service(
-            AzureChatCompletion(
-                service_id=service_id,
-                api_version="2023-05-15",
-                #deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
-                deployment_name=os.getenv("AZURE_OPENAI_GPT4V_DEPLOYMENT"),
-                api_key="asdjaklsdja",
-                #api_key="c488fdb8ed5c42d3b86c62102102caf5",
-                endpoint="https://cog-rjth475fytae6.openai.azure.com/"
-            ),
-        )
-        logging.basicConfig(
-            format="[%(asctime)s - %(name)s:%(lineno)d - %(levelname)s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        logging.getLogger("kernel").setLevel(logging.DEBUG)
-
-        plugins_directory = "prompt_template_samples"
-        
-        kernel.add_plugin(plugin=ApiPlugin(), plugin_name="api")
-        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="KYBData")
-        kernel.add_plugin(parent_directory=plugins_directory, plugin_name="Email")
-
-            
-        #chat = ChatHistory()
-        question = f"""Analyze the following user input which contains both current query and chat history, then determine the most appropriate action:
-            User Input: {query_text}
-            
-            if you decide to call "FetchBusinessData" dont worry about parameters or API key. They are already provided in function code. Just call function and return response and store it in result.final_answer.
-
-            If the context is related to KYB (Know Your Business) or KYC (Know Your Customer), Fetch data from FetchBusinessData and create a report for that data using KYBData.
-            If the context is related to generating a KYB report, Fetch data from FetchBusinessData and create a report for that data using KYBData.
-            If the context is not related to KYB or KYC, respond with "No relevant function available".
-
-            Respond with only one of the above options.""",
-        
-    
-        # Configure planner options
-        options = FunctionCallingStepwisePlannerOptions(
-            max_iterations=10,
-            max_tokens=4000,
-        )
-    
-        # Initialize the planner
-        planner = FunctionCallingStepwisePlanner(service_id=service_id, options=options)
-
-        try:
-            result = await planner.invoke(kernel, question)
-            # print(f"Q: {question}\nA: {result}\n")
-            print(f"Answer:    {result.final_answer}")
-            semantic_kernel_answer = result.final_answer
-            # semantic_kernel_answer = """The fetched KYB data for Middesk Inc has been processed successfully. Here are the details:
-            #         - **Business Name**: Middesk Inc
-            #         - **TIN**: 12-3410000
-            #         - **Website**: https://www.middesk.com
-            #         - **Address**: 577 Howard St, Suite 400, San Francisco, CA 94105
-            #         - **Status**: Open"""
-        except Exception as e:
-            logging.error(f"Error processing question '{question}': {e}")
-            semantic_kernel_answer = None
-
         # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
 
         # If retrieval mode includes vectors, compute an embedding for the query
@@ -255,9 +194,6 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
         )
         sources_content = self.get_sources_content(results, use_semantic_captions, use_image_citation=True)
         content = "\n".join(sources_content)
-
-        if semantic_kernel_answer:
-            content = f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\nAdditional Sources:\n{content}"
             
         # STEP 3: Generate a contextual and content specific answer using the search results and chat history
 
@@ -289,7 +225,6 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
             new_user_content=(
             f"{original_user_query}\n\n"
             "Important: First, neglect the Semantic Kernel Answer. "
-            f"Semantic Kernel Answer:\n{semantic_kernel_answer}\n\n"
             f"Additional Sources:\n{content}"
         ),
             max_tokens=self.chatgpt_token_limit - response_token_limit,
@@ -327,10 +262,6 @@ class ChatReadRetrieveReadVisionApproach(ChatApproach):
                 ThoughtStep(
                     "Search results",
                     [result.serialize_for_results() for result in results],
-                ),
-                ThoughtStep(
-                    "Semantic Kernel Answer",
-                    semantic_kernel_answer,
                 ),
                 ThoughtStep(
                     "Prompt to generate answer",

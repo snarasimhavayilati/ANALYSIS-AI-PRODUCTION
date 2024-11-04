@@ -15,14 +15,10 @@ class ChatApproach(Approach, ABC):
     ASSISTANT = "assistant"
 
     query_prompt_few_shots = [
-        {"role": USER, "content": "What are key areas of the Bank Secrecy Act?"},
-        {"role": ASSISTANT, "content": "Summarize the Bank Secrecy Act and reference the actual regulation, before referencing handbooks or manuals. Search query: Bank Secrecy Act regulation key areas source:regulation"},
-        {"role": USER, "content": "What is required for a Community Reinvestment Act audit?"},
-        {"role": ASSISTANT, "content": "Show the main topics covered in a Community Reinvestment Act audit and prioritize manuals and handbooks as primary sources. Search query: Community Reinvestment Act audit requirements source:handbook"},
-        {"role": USER, "content": "Generate search query for: Can you explain the differences between US banking Regulation O and Regulation W?"},
-        {"role": ASSISTANT, "content": "Explain the main differences between US banking Regulation O and Regulation W. Prioritize using regulations to answer and only use manuals and handbooks as secondary sources. Search query: differences between US banking Regulation O Regulation W source:regulation"},
-        {"role": USER, "content": "What are the key provisions of the Truth in Lending Act (TILA)?"},
-        {"role": ASSISTANT, "content": "Show the main topics within the Truth in Lending Act (TILA). Prioritize using regulations in your answer and only use manuals and handbooks as secondary sources. Search query: Truth in Lending Act TILA key provisions source:regulation"},
+        {"role": USER, "content": "What are creditor responsibities during payment disputes?"},
+        {"role": ASSISTANT, "content": "Summarize What creditors must do during payment disputes"},
+        {"role": USER, "content": "What are EU Privicy regulations?"},
+        {"role": ASSISTANT, "content": "Show available EU Privacy regulations"},
     ]
     NO_RESPONSE = "0"
 
@@ -35,12 +31,9 @@ class ChatApproach(Approach, ABC):
     Make sure the last question ends with ">>".
     """
 
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be 
-    answered by searching in a knowledge base.
-    You have access to Azure AI Search index with 100's of documents, including regulations and handbooks.
+    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base.
+    You have access to Azure AI Search index with 100's of documents.
     Generate a search query based on the conversation and the new question.
-    Determine whether to prioritize regulations or handbooks based on the nature of the question.
-    Add 'source:regulation' or 'source:handbook' to the end of the query to indicate the preferred source.
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<>> in the search query terms.
     Do not include any special characters like '+'.
@@ -84,13 +77,8 @@ class ChatApproach(Approach, ABC):
                         return search_query
         elif query_text := response_message.content:
             if query_text.strip() != self.NO_RESPONSE:
-                # Check if source is specified in the query
-                if "source:regulation" in query_text or "source:handbook" in query_text:
-                    return query_text
-                else:
-                    # If no source is specified, add a default
-                    return f"{query_text} source:regulation"
-        return f"{user_query} source:regulation"  # Default to regulation if no query is generated
+                return query_text
+        return user_query
 
     def extract_followup_questions(self, content: str):
         return content.split("<<")[0], re.findall(r"<<([^>>]+)>>", content)

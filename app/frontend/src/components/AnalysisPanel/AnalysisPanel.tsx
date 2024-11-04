@@ -58,8 +58,9 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
         if (!activeCitation) {
             return null;
         }
-
         const fileExtension = activeCitation.split(".").pop()?.toLowerCase();
+        console.log("File Extension");
+        console.log(fileExtension);
         switch (fileExtension) {
             case "png":
                 return <img src={citation} className={styles.citationImg} alt="Citation Image" />;
@@ -76,13 +77,13 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
             selectedKey={activeTab}
             onLinkClick={pivotItem => pivotItem && onActiveTabChanged(pivotItem.props.itemKey! as AnalysisPanelTabs)}
         >
-            <PivotItem
+            {/* <PivotItem
                 itemKey={AnalysisPanelTabs.ThoughtProcessTab}
                 headerText="Thought process"
                 headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
             >
                 <ThoughtProcess thoughts={answer.context.thoughts || []} />
-            </PivotItem>
+            </PivotItem> */}
             <PivotItem
                 itemKey={AnalysisPanelTabs.SupportingContentTab}
                 headerText="Supporting content"

@@ -58,7 +58,8 @@
 }
 
 .citationImg {
-    height: 450px;
-    max-width: 100%;
-    object-fit: contain;
+    max-width: 100%; /* Adjust as needed */
+    max-height: 100vh; /* Adjust as needed */
+    width: auto;
+    height: auto;
 }

@@ -399,7 +399,7 @@ def test_upload_hidden(page: Page, live_server_url: str):
     expect(page).to_have_title("GPT + Enterprise data | Sample")
 
     expect(page.get_by_role("button", name="Clear chat")).to_be_visible()
-    expect(page.get_by_role("button", name="Manage file uploads")).not_to_be_visible()
+    expect(page.get_by_role("button", name="Uploads")).not_to_be_visible()
 
 
 def test_upload_disabled(page: Page, live_server_url: str):
@@ -430,6 +430,6 @@ def test_upload_disabled(page: Page, live_server_url: str):
 
     expect(page).to_have_title("GPT + Enterprise data | Sample")
 
-    expect(page.get_by_role("button", name="Manage file uploads")).to_be_visible()
-    expect(page.get_by_role("button", name="Manage file uploads")).to_be_disabled()
+    expect(page.get_by_role("button", name="Uploads")).to_be_visible()
+    expect(page.get_by_role("button", name="Uploads")).to_be_disabled()
     # We can't test actual file upload as we don't currently have isLoggedIn(client) mocked out

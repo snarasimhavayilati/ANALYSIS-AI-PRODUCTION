@@ -98,13 +98,13 @@ const Layout = () => {
 
             <Outlet />
             <footer className={styles.footer} role={"contentinfo"}>
-                <IconButton
+                {/* <IconButton
                     iconProps={{ iconName: "Download" }}
                     title="Download Page"
                     ariaLabel="Download Page"
                     onClick={handleDownload}
                     className={styles.downloadButton}
-                />
+                /> */}
                 {/* <a href="https://flatironsai.com/beta-feedback/" target="_blank" rel="noopener norefererrer">
                     <button className={styles.footerButton}>Feedback?</button>
                 </a> */}

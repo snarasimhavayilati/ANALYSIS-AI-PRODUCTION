@@ -209,18 +209,28 @@ class Approach(ABC):
                 (self.get_citation((doc.sourcepage or ""), use_image_citation)) + ": " + nonewlines(doc.content or "")
                 for doc in results
             ]
-
+    
     def get_citation(self, sourcepage: str, use_image_citation: bool) -> str:
         if use_image_citation:
-            return sourcepage
-        else:
             path, ext = os.path.splitext(sourcepage)
             if ext.lower() == ".png":
                 page_idx = path.rfind("-")
-                page_number = int(path[page_idx + 1 :])
-                return f"{path[:page_idx]}.pdf#page={page_number}"
-
+                
+                if page_idx != -1:
+                    page_number = int(path[page_idx + 1 :])
+                    return f"{path[:page_idx]}.pdf#page={page_number}"
+            
             return sourcepage
+        else:
+            path, ext = os.path.splitext(sourcepage)
+            if ext.lower() == ".pdf":
+                page_idx = path.rfind("-")
+                
+                if page_idx != -1:
+                    page_number = int(path[page_idx + 1 :])
+                    return f"{path[:page_idx]}.pdf#page={page_number}"
+        
+        return sourcepage
 
     async def compute_text_embedding(self, q: str):
         SUPPORTED_DIMENSIONS_MODEL = {
@@ -236,7 +246,6 @@ class Approach(ABC):
             {"dimensions": self.embedding_dimensions} if SUPPORTED_DIMENSIONS_MODEL[self.embedding_model] else {}
         )
         embedding = await self.openai_client.embeddings.create(
-            # Azure OpenAI takes the deployment name as the model name
             model=self.embedding_deployment if self.embedding_deployment else self.embedding_model,
             input=q,
             **dimensions_args,

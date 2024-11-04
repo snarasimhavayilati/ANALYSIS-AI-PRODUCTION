@@ -105,11 +105,20 @@ class SearchManager:
                     filterable=True,
                     facetable=True,
                 ),
-                SimpleField(
+                # SimpleField(
+                #     name="sourcefile",
+                #     type="Edm.String",
+                #     filterable=True,
+                #     facetable=True,
+                # ),
+                SearchField(
                     name="sourcefile",
                     type="Edm.String",
+                    searchable=True,
                     filterable=True,
+                    sortable=False,
                     facetable=True,
+                    analyzer_name=self.search_analyzer_name,
                 ),
                 SimpleField(
                     name="storageUrl",

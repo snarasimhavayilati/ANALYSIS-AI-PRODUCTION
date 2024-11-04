@@ -1,16 +1,44 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { getCitationFilePath } from "../../api";
+import React from "react";
 
 type HtmlParsedAnswer = {
     answerHtml: string;
     citations: string[];
 };
 
+function replaceBoldSyntax(text: string): JSX.Element[] {
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return parts.map((part, index) => {
+        if (index % 2 === 0) {
+            return <React.Fragment key={index}>{part}</React.Fragment>;
+        } else {
+            return <b key={index}>{part}</b>;
+        }
+    });
+}
+
+function convertHeadingsToBold(text: string): string {
+    return text
+        .split("\n")
+        .map(line => {
+            if (line.startsWith("#")) {
+                // Remove '#' symbols and trim, then wrap with '**'
+                return `**${line.replace(/^#+\s*/, "").trim()}**`;
+            }
+            return line;
+        })
+        .join("\n");
+}
+
 export function parseAnswerToHtml(answer: string, isStreaming: boolean, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
 
-    // trim any whitespace from the end of the answer after removing follow-up questions
-    let parsedAnswer = answer.trim();
+    // Convert headings to bold and trim any whitespace
+    let parsedAnswer = convertHeadingsToBold(answer).trim();
+
+    console.log("Entered Parser");
+    console.log("Processed Answer:", parsedAnswer);
 
     // Omit a citation that is still being typed during streaming
     if (isStreaming) {
@@ -25,13 +53,14 @@ export function parseAnswerToHtml(answer: string, isStreaming: boolean, onCitati
         }
         const truncatedAnswer = parsedAnswer.substring(0, lastIndex);
         parsedAnswer = truncatedAnswer;
+        console.log("Truncated Answer:", parsedAnswer);
     }
 
     const parts = parsedAnswer.split(/\[([^\]]+)\]/g);
 
-    const fragments: string[] = parts.map((part, index) => {
+    const fragments = parts.map((part, index) => {
         if (index % 2 === 0) {
-            return part;
+            return replaceBoldSyntax(part);
         } else {
             let citationIndex: number;
             if (citations.indexOf(part) !== -1) {
@@ -43,16 +72,19 @@ export function parseAnswerToHtml(answer: string, isStreaming: boolean, onCitati
 
             const path = getCitationFilePath(part);
 
-            return renderToStaticMarkup(
-                <a className="supContainer" title={part} onClick={() => onCitationClicked(path)}>
-                    <sup>{citationIndex}</sup>
-                </a>
+            return (
+                <React.Fragment key={index}>
+                    {" "}
+                    <a className="supContainer" title={part} onClick={() => onCitationClicked(path)}>
+                        <sup>{citationIndex}</sup>
+                    </a>
+                </React.Fragment>
             );
         }
     });
 
     return {
-        answerHtml: fragments.join(""),
+        answerHtml: renderToStaticMarkup(<>{fragments}</>),
         citations
     };
 }
