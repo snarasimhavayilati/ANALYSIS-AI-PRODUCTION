@@ -15,18 +15,18 @@ class ChatApproach(Approach, ABC):
     ASSISTANT = "assistant"
 
     query_prompt_few_shots = [
-        {"role": USER, "content": "What are creditor responsibities during payment disputes?"},
-        {"role": ASSISTANT, "content": "Summarize What creditors must do during payment disputes"},
-        {"role": USER, "content": "What are EU Privicy regulations?"},
-        {"role": ASSISTANT, "content": "Show available EU Privacy regulations"},
+        {"role": USER, "content": "What are the key financial metrics to evaluate a company?"},
+        {"role": ASSISTANT, "content": "Key financial metrics for evaluating a company include revenue growth, profit margins, return on assets (ROA), return on equity (ROE), and debt-to-equity ratio. Additionally, industry-specific metrics such as production volumes, sales figures, and market share are crucial."},
+        {"role": USER, "content": "How do macroeconomic factors impact the industry?"},
+        {"role": ASSISTANT, "content": "Macroeconomic factors such as interest rates, fuel prices, and economic cycles significantly impact the industry. Higher fuel prices increase operating costs, while economic downturns can reduce travel demand, affecting revenue and profitability."},
     ]
     NO_RESPONSE = "0"
 
     follow_up_questions_prompt_content = """Generate 3 very brief follow-up questions that the user would likely ask next.
     Enclose the follow-up questions in double angle brackets. Example:
-    <<Who is not covered by EU Privacy Regulations?>>
-    <<What are the responsibilties of the customer during credit desputes?>>
-    <<If customer short pays, can interest be charged by creditor on balance?>>
+    <<What are the current trends in the automotive or airline market?>>
+    <<How do regulatory changes affect airline or automotive operations?>>
+    <<What are the key risks facing the airline or automotive industry?>>
     Do no repeat questions that have already been asked.
     Make sure the last question ends with ">>".
     """

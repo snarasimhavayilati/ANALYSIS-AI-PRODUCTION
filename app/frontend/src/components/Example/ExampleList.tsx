@@ -3,17 +3,17 @@ import { Example } from "./Example";
 import styles from "./Example.module.css";
 
 const DEFAULT_EXAMPLES: string[] = [
-    "What is required for a payment company to become a PayFac?",
-    "Write an email to a customer of Flatirons Bank who has failed to make their installment loan payment.",
-    "We have an upcoming CRA audit from the OCC, what should the management team do to prepare?",
-    "Create a 5-question test on the Bank Secrecy Act, provide 3 possible answers for each question."
+    "Which airlines are achieving their 2024 objectives?",
+    "Explain Tesla's margin compression in 2024.",
+    "What is Ford's strategy for electric vehicles?",
+    "Please list all the companies available in the system?"
 ];
 
 const GPT4V_EXAMPLES: string[] = [
-    "What is required for a payment company to become a PayFac?",
-    "Write an email to a customer of Flatirons Bank who has failed to make their installment loan payment.",
-    "We have an upcoming CRA audit from the OCC, what should the management team do to prepare?",
-    "Create a 5-question test on the Bank Secrecy Act, provide 3 possible answers for each question."
+    "Which airlines are achieving their 2024 objectives?",
+    "Explain Tesla's margin compression in 2024.",
+    "What is Ford's strategy for electric vehicles?",
+    "Please list all the companies available in the system?"
 ];
 
 interface Props {

@@ -46,31 +46,9 @@ const Layout = () => {
                         {/* <h3 className={styles.headerTitle}>GPT + Enterprise data | Sample</h3> */}
                         <img src={logo} alt="Logo" className={styles.headerLogo} />
                     </Link>
-                    <nav>
+                    {/* <nav>
                         <ul className={styles.headerNavList}>
-                            {/* <li>
-                                <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Chat
-                                </NavLink>
-                            </li>
-                            <li className={styles.headerNavLeftMargin}>
-                                <NavLink to="/qa" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Ask a question
-                                </NavLink>
-                            </li>
-                            <li className={styles.headerNavLeftMargin}>
-                                <a href="https://aka.ms/entgptsearch" target={"_blank"} title="Github repository link">
-                                    <img
-                                        src={github}
-                                        alt="Github logo"
-                                        aria-label="Link to github repository"
-                                        width="20px"
-                                        height="20px"
-                                        role="img"
-                                        className={styles.githubLogo}
-                                    />
-                                </a>
-                            </li> */}
+                            
                             <li className={styles.headerNavLeftMargin}>
                                 <a href="https://flatironsai.com/enterprise-copilot/" target="_blank" rel="noopener noreferrer">
                                     <button className={styles.navButton}>Learn About Copilot Enterprise</button>
@@ -87,7 +65,7 @@ const Layout = () => {
                                 </a>
                             </li>
                         </ul>
-                    </nav>
+                    </nav> */}
                     {/* <div className={styles.headerRight}>
                         {username && <span className={styles.welcomeMessage}>Hello, {username}</span>}
                         {useLogin && <LoginButton />}

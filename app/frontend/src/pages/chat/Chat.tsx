@@ -341,8 +341,8 @@ const Chat = () => {
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(36,189,177,255)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Compliance AI Co-Pilot</h1>
-                            <h2 className={styles.chatEmptyStateSubtitle}>Ask me a question about compliance or give me an assignment</h2>
+                            <h1 className={styles.chatEmptyStateTitle}>ANALYSIS AI</h1>
+                            <h2 className={styles.chatEmptyStateSubtitle}>Ask about the Auto or Airlines Industries</h2>
                             <ExampleList onExampleClicked={onExampleClicked} useGPT4V={useGPT4V} />
                         </div>
                     ) : (
@@ -416,7 +416,7 @@ const Chat = () => {
                     <div className={styles.chatInput}>
                         <QuestionInput
                             clearOnSend
-                            placeholder="Type a new question (e.g. How many days does a creditor have to notify a customer of a delinquency? )"
+                            placeholder="Type a new question (e.g. What are Delta Air Lines earnings for 2024? )"
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question)}
                             showSpeechInput={showSpeechInput}
